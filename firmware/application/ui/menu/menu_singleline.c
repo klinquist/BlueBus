@@ -66,10 +66,7 @@ static uint8_t MenuSingleLineSettingIsHidden(
     }
     if (
         setting == MENU_SINGLELINE_SETTING_IDX_COLD_OIL_DISPLAY &&
-        (
-            context->uiMode != CONFIG_UI_CD53 ||
-            context->activeView != MENU_SINGLELINE_VIEW_OBC
-        )
+        context->uiMode != CONFIG_UI_CD53
     ) {
         return 1;
     }
@@ -932,7 +929,7 @@ void MenuSingleLineSettingsNextSetting(MenuSingleLineContext_t *context, uint8_t
         if (context->settingValue == CONFIG_SETTING_ON) {
             MenuSingleLineSetDisplayText(
                 context,
-                "ColdOilDisp: On",
+                "CldOil: On",
                 0,
                 MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
             );
@@ -940,7 +937,7 @@ void MenuSingleLineSettingsNextSetting(MenuSingleLineContext_t *context, uint8_t
             context->settingValue = CONFIG_SETTING_OFF;
             MenuSingleLineSetDisplayText(
                 context,
-                "ColdOilDisp: Off",
+                "CldOil: Off",
                 0,
                 MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
             );
@@ -951,7 +948,7 @@ void MenuSingleLineSettingsNextSetting(MenuSingleLineContext_t *context, uint8_t
         if (context->settingValue == CONFIG_SETTING_ON) {
             MenuSingleLineSetDisplayText(
                 context,
-                "LowVoltWrn: On",
+                "LowV: On",
                 0,
                 MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
             );
@@ -959,7 +956,7 @@ void MenuSingleLineSettingsNextSetting(MenuSingleLineContext_t *context, uint8_t
             context->settingValue = CONFIG_SETTING_OFF;
             MenuSingleLineSetDisplayText(
                 context,
-                "LowVoltWrn: Off",
+                "LowV: Off",
                 0,
                 MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
             );
