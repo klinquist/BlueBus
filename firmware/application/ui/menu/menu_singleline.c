@@ -262,6 +262,7 @@ void MenuSingleLineSetUIView(MenuSingleLineContext_t *context, uint8_t view)
             MenuSingleLineOBC(context);
             break;
         case MENU_SINGLELINE_VIEW_DEVICES:
+            context->btDeviceIndex = MENU_SINGLELINE_DEVICE_NONE;
             MenuSingleLineDevices(context, MENU_SINGLELINE_DIRECTION_FORWARD);
             break;
     }
@@ -1357,7 +1358,7 @@ void MenuSingleLineDevices(
         context->btDeviceIndex = 0;
     } else {
         if (direction == MENU_SINGLELINE_DIRECTION_FORWARD) {
-            if (context->btDeviceIndex >= context->bt->pairedDevicesCount) {
+            if (context->btDeviceIndex >= context->bt->pairedDevicesCount - 1) {
                 context->btDeviceIndex = 0;
             } else {
                 context->btDeviceIndex++;
@@ -1375,7 +1376,10 @@ void MenuSingleLineDevices(
     UtilsStrncpy(text, dev->deviceName, BT_DEVICE_NAME_LEN);
     // Add a space and asterisks to the end of the device name
     // if it's the currently selected device
-    if (context->btDeviceIndex == context->bt->activeDevice.deviceIndex) {
+    if (
+        context->bt->activeDevice.status == BT_DEVICE_STATUS_CONNECTED &&
+        context->btDeviceIndex == context->bt->activeDevice.deviceIndex
+    ) {
         uint8_t startIdx = strlen(text);
         text[startIdx++] = 0x20;
         text[startIdx++] = 0x2A;
@@ -1391,7 +1395,10 @@ void MenuSingleLineDevices(
 void MenuSingleLineDevicesConnect(MenuSingleLineContext_t *context) {
     if (context->bt->pairedDevicesCount > 0) {
         // Connect to device
-        if (context->btDeviceIndex != context->bt->activeDevice.deviceIndex) {
+        if (
+            context->bt->activeDevice.status != BT_DEVICE_STATUS_CONNECTED ||
+            context->btDeviceIndex != context->bt->activeDevice.deviceIndex
+        ) {
             // Trigger device selection event
             EventTriggerCallback(
                 UI_EVENT_INITIATE_CONNECTION,
@@ -1412,6 +1419,4 @@ void MenuSingleLineDevicesConnect(MenuSingleLineContext_t *context) {
             );
         }
     }
-
 }
-
