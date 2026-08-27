@@ -23,6 +23,8 @@ int main(void)
 {
     BlueBusSimInit();
     AssertDisplay("Bluetooth");
+    assert(BlueBusSimGetEngineRunning() == 0);
+    assert(BlueBusSimGetRPM() == 0);
 
     SelectOBC();
     assert(strncmp(BlueBusSimGetDisplay(), "C:", 2) == 0);
@@ -41,6 +43,8 @@ int main(void)
     BlueBusSimSetVoltage(132);
     AssertDisplay("OIL COLD");
     BlueBusSimStartEngine();
+    assert(BlueBusSimGetEngineRunning() == 1);
+    assert(BlueBusSimGetRPM() == 800);
     AssertDisplay("LOW V13.2");
 
     BlueBusSimSetSetting(CONFIG_SETTING_LOW_VOLT_WARNING, CONFIG_SETTING_OFF);
@@ -51,6 +55,8 @@ int main(void)
     BlueBusSimSetVoltage(133);
     AssertDisplay("OIL COLD");
     BlueBusSimStopEngine();
+    assert(BlueBusSimGetEngineRunning() == 0);
+    assert(BlueBusSimGetRPM() == 0);
     BlueBusSimSetVoltage(120);
     AssertDisplay("OIL COLD");
 

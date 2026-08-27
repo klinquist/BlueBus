@@ -359,7 +359,7 @@ void BlueBusSimPressPrevious(void) { SimSendCDCCommand(IBUS_CDC_CMD_CHANGE_TRACK
 const char *BlueBusSimGetDisplay(void) { return SimDisplay; }
 const char *BlueBusSimGetTrace(void) { return SimTrace; }
 uint8_t BlueBusSimGetEngineRunning(void) { return SimEngineRunning; }
-uint16_t BlueBusSimGetRPM(void) { return SimRPM; }
+uint16_t BlueBusSimGetRPM(void) { return SimEngineRunning ? SimRPM : 0; }
 uint16_t BlueBusSimGetSpeed(void) { return SimSpeed; }
 uint16_t BlueBusSimGetVoltage(void) { return SimIBus.batteryVoltage; }
 int16_t BlueBusSimGetCoolantTemperature(void) { return SimIBus.coolantTemperature; }
