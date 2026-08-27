@@ -26,6 +26,25 @@ int main(void)
     assert(BlueBusSimGetEngineRunning() == 0);
     assert(BlueBusSimGetRPM() == 0);
 
+    // Alert settings must be available and fit on the CD53 display without
+    // requiring the OBC view to be selected first.
+    BlueBusSimPressCD(4);
+    BlueBusSimAdvance(2000);
+    BlueBusSimPressPrevious();
+    BlueBusSimPressPrevious();
+    BlueBusSimPressPrevious();
+    BlueBusSimPressPrevious();
+    AssertDisplay("CldOil: Off");
+    BlueBusSimPressCD(2);
+    BlueBusSimPressNext();
+    BlueBusSimPressCD(2);
+    assert(BlueBusSimGetSetting(CONFIG_SETTING_COLD_OIL_DISPLAY) == CONFIG_SETTING_ON);
+    BlueBusSimAdvance(1000);
+    AssertDisplay("CldOil: On");
+    BlueBusSimPressNext();
+    AssertDisplay("LowV: On");
+
+    BlueBusSimReset();
     SelectOBC();
     assert(strncmp(BlueBusSimGetDisplay(), "C:", 2) == 0);
 
