@@ -51,6 +51,11 @@
 #define MENU_SINGLELINE_DIRECTION_FORWARD 0
 #define MENU_SINGLELINE_DIRECTION_BACK 1
 
+// Sensor values are stored in whole degrees Celsius and tenths of a volt.
+// 72C is the first whole-degree reading that is not below 160F.
+#define MENU_SINGLELINE_OIL_COLD_THRESHOLD_C 72
+#define MENU_SINGLELINE_LOW_VOLTAGE_THRESHOLD_TENTHS 133
+
 /*
  *
  */

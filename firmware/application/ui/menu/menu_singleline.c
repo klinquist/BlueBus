@@ -161,6 +161,10 @@ void MenuSingleLineIBusSensorValueUpdate(void *ctx, uint8_t *type)
     if (
         updateType == IBUS_SENSOR_VALUE_COOLANT_TEMP ||
         updateType == IBUS_SENSOR_VALUE_OIL_TEMP ||
+        (
+            context->uiMode == CONFIG_UI_CD53 &&
+            updateType == IBUS_SENSOR_VALUE_BATTERY_VOLTAGE
+        ) ||
         updateType == IBUS_SENSOR_VALUE_TEMP_UNIT
     ) {
         MenuSingleLineOBC(context);
@@ -207,6 +211,7 @@ void MenuSingleLineOBC(MenuSingleLineContext_t *context)
 
     int16_t coolant = context->ibus->coolantTemperature;
     int16_t oil = context->ibus->oilTemperature;
+    uint8_t batteryVoltage = context->ibus->batteryVoltage;
     uint16_t speed = context->vehicleSpeed;
 
     // Convert to Fahrenheit if configured
@@ -222,7 +227,25 @@ void MenuSingleLineOBC(MenuSingleLineContext_t *context)
     }
 
     char text[25] = {0};
-    if (context->uiMode == CONFIG_UI_MID) {
+    if (
+        context->uiMode == CONFIG_UI_CD53 &&
+        batteryVoltage > 0 &&
+        batteryVoltage < MENU_SINGLELINE_LOW_VOLTAGE_THRESHOLD_TENTHS
+    ) {
+        snprintf(
+            text,
+            sizeof(text),
+            "LOW V%d.%d",
+            batteryVoltage / 10,
+            batteryVoltage % 10
+        );
+    } else if (
+        context->uiMode == CONFIG_UI_CD53 &&
+        context->ibus->oilTemperature > 0 &&
+        context->ibus->oilTemperature < MENU_SINGLELINE_OIL_COLD_THRESHOLD_C
+    ) {
+        UtilsStrncpy(text, "OIL COLD", sizeof(text));
+    } else if (context->uiMode == CONFIG_UI_MID) {
         // MID: 24 chars max
         if (oil != 0) {
             snprintf(text, 25, "C:%d O:%d S:%u", coolant, oil, speed);
@@ -1414,4 +1437,3 @@ void MenuSingleLineDevicesConnect(MenuSingleLineContext_t *context) {
     }
 
 }
-
