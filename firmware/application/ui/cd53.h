@@ -59,6 +59,7 @@ typedef struct CD53Context_t {
     uint8_t radioType;
     uint8_t mediaChangeState;
     uint8_t displayedLowVoltage;
+    uint8_t engineRunning;
     uint8_t scrollTick: 2;
     uint32_t lastTelephoneButtonPress;
     UtilsAbstractDisplayValue_t mainDisplay;
@@ -77,6 +78,7 @@ void CD53BTPlaybackStatus(void *, uint8_t *);
 void CD53IBusBMBTButtonPress(void *, uint8_t *);
 void CD53IBusCDChangerStatus(void *, uint8_t *);
 void CD53IBusIgnitionStatus(void *, unsigned char *);
+void CD53IBusSpeedRPMUpdate(void *, uint8_t *);
 void CD53IBusMFLButton(void *, uint8_t *);
 void CD53IBusRADWriteDisplay(void *, uint8_t *);
 void CD53GTScreenModeSet(void *, uint8_t *);

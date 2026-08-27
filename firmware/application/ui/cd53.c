@@ -80,6 +80,11 @@ void CD53Init(BT_t *bt, IBus_t *ibus)
         &Context
     );
     EventRegisterCallback(
+        IBUS_EVENT_IKE_SPEED_RPM_UPDATE,
+        &CD53IBusSpeedRPMUpdate,
+        &Context
+    );
+    EventRegisterCallback(
         IBUS_EVENT_MFL_BUTTON,
         &CD53IBusMFLButton,
         &Context
@@ -147,6 +152,10 @@ void CD53Destroy()
     EventUnregisterCallback(
         IBUS_EVENT_IKE_IGNITION_STATUS,
         &CD53IBusIgnitionStatus
+    );
+    EventUnregisterCallback(
+        IBUS_EVENT_IKE_SPEED_RPM_UPDATE,
+        &CD53IBusSpeedRPMUpdate
     );
     EventUnregisterCallback(
         IBUS_EVENT_MFL_BUTTON,
@@ -597,10 +606,19 @@ void CD53IBusIgnitionStatus(void *ctx, unsigned char *pkt)
 {
     CD53Context_t *context = (CD53Context_t *) ctx;
     uint8_t ignitionStatus = pkt[0];
+    if (ignitionStatus == IBUS_IGNITION_OFF) {
+        context->engineRunning = 0;
+    }
     if (ignitionStatus == IBUS_IGNITION_OFF && context->mode != CD53_MODE_OFF) {
         IBusCommandTELIKEDisplayClear(context->ibus);
         context->mode = CD53_MODE_OFF;
     }
+}
+
+void CD53IBusSpeedRPMUpdate(void *ctx, uint8_t *pkt)
+{
+    CD53Context_t *context = (CD53Context_t *) ctx;
+    context->engineRunning = pkt[IBUS_PKT_DB2] > 0;
 }
 
 void CD53IBusMFLButton(void *ctx, unsigned char *pkt)
@@ -652,6 +670,7 @@ static uint8_t CD53DisplayLowVoltageOverride(CD53Context_t *context)
 
     uint8_t batteryVoltage = context->ibus->batteryVoltage;
     if (
+        context->engineRunning &&
         batteryVoltage > 0 &&
         batteryVoltage < CD53_LOW_VOLTAGE_THRESHOLD_TENTHS
     ) {
