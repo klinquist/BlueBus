@@ -644,6 +644,42 @@ void CD53IBusRADWriteDisplay(void *ctx, unsigned char *pkt)
     }
 }
 
+static uint8_t CD53DisplayLowVoltageOverride(CD53Context_t *context)
+{
+    if (context->radioType != CONFIG_UI_CD53) {
+        return 0;
+    }
+
+    uint8_t batteryVoltage = context->ibus->batteryVoltage;
+    if (
+        batteryVoltage > 0 &&
+        batteryVoltage < CD53_LOW_VOLTAGE_THRESHOLD_TENTHS
+    ) {
+        // Suppress all other display content until voltage recovers.
+        context->tempDisplay.status = CD53_DISPLAY_STATUS_OFF;
+        if (context->displayedLowVoltage != batteryVoltage) {
+            char text[CD53_DISPLAY_TEXT_LEN + 1] = {0};
+            snprintf(
+                text,
+                sizeof(text),
+                "LOW V%d.%d",
+                batteryVoltage / 10,
+                batteryVoltage % 10
+            );
+            IBusCommandTELIKEDisplayWrite(context->ibus, text);
+            context->displayedLowVoltage = batteryVoltage;
+        }
+        return 1;
+    }
+
+    if (context->displayedLowVoltage > 0) {
+        context->displayedLowVoltage = 0;
+        context->mainDisplay.index = 0;
+        context->mainDisplay.timeout = 0;
+    }
+    return 0;
+}
+
 void CD53TimerDisplay(void *ctx)
 {
     CD53Context_t *context = (CD53Context_t *) ctx;
@@ -652,6 +688,9 @@ void CD53TimerDisplay(void *ctx)
         context->mode == CD53_MODE_OFF ||
         context->mode == CD53_MODE_ACTIVE_DISPLAY_OFF
     ) {
+        return;
+    }
+    if (CD53DisplayLowVoltageOverride(context)) {
         return;
     }
     if (context->scrollTick < 3) {

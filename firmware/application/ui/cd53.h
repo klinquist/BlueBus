@@ -20,6 +20,7 @@
 #define CD53_DISPLAY_STATUS_NEW 2
 #define CD53_DISPLAY_TIMER_INT 125
 #define CD53_DISPLAY_TEXT_LEN 11
+#define CD53_LOW_VOLTAGE_THRESHOLD_TENTHS 133
 #define CD53_MEDIA_STATE_OK 0
 #define CD53_MEDIA_STATE_CHANGE 1
 #define CD53_MEDIA_STATE_METADATA_OK 2
@@ -57,6 +58,7 @@ typedef struct CD53Context_t {
     uint8_t settingMode;
     uint8_t radioType;
     uint8_t mediaChangeState;
+    uint8_t displayedLowVoltage;
     uint8_t scrollTick: 2;
     uint32_t lastTelephoneButtonPress;
     UtilsAbstractDisplayValue_t mainDisplay;
