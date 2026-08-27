@@ -147,6 +147,12 @@ uint8_t UpgradeProcess(BT_t *bt, IBus_t *ibus)
         ConfigSetSetting(CONFIG_SETTING_LM_IO_POLL_DISABLED, CONFIG_SETTING_OFF);
         LogRaw("Ran Upgrade 1.4.7\r\n");
     }
+    // Changes in version 1.4.41
+    if (UpgradeVersionCompare(curMajor, curMinor, curPatch, 1, 4, 41) == 1) {
+        ConfigSetSetting(CONFIG_SETTING_COLD_OIL_DISPLAY, CONFIG_SETTING_OFF);
+        ConfigSetSetting(CONFIG_SETTING_LOW_VOLT_WARNING, CONFIG_SETTING_ON);
+        LogRaw("Ran Upgrade 1.4.41\r\n");
+    }
     ConfigSetFirmwareVersion(
         FIRMWARE_VERSION_MAJOR,
         FIRMWARE_VERSION_MINOR,
@@ -197,4 +203,3 @@ uint8_t UpgradeVersionCompare(
     }
     return 0;
 }
-

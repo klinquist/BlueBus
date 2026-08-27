@@ -28,6 +28,8 @@ static uint8_t SETTINGS_MENU[] = {
     MENU_SINGLELINE_SETTING_IDX_COMFORT_LOCKS,
     MENU_SINGLELINE_SETTING_IDX_COMFORT_UNLOCK,
     MENU_SINGLELINE_SETTING_IDX_VISUAL_PDC,
+    MENU_SINGLELINE_SETTING_IDX_COLD_OIL_DISPLAY,
+    MENU_SINGLELINE_SETTING_IDX_LOW_VOLT_WARNING,
     MENU_SINGLELINE_SETTING_IDX_ABOUT,
     MENU_SINGLELINE_SETTING_IDX_PAIRINGS
 };
@@ -47,8 +49,38 @@ static uint8_t SETTINGS_TO_CONFIG_MAP[] = {
     CONFIG_SETTING_COMFORT_HOME_LIGHTS,
     CONFIG_SETTING_COMFORT_LOCKS,
     CONFIG_SETTING_COMFORT_UNLOCK,
-    CONFIG_SETTING_VISUAL_PDC
+    CONFIG_SETTING_VISUAL_PDC,
+    CONFIG_SETTING_COLD_OIL_DISPLAY,
+    CONFIG_SETTING_LOW_VOLT_WARNING
 };
+
+static uint8_t MenuSingleLineSettingIsHidden(
+    MenuSingleLineContext_t *context,
+    uint8_t setting
+) {
+    if (
+        setting == MENU_SINGLELINE_SETTING_IDX_TEL_TCU_MODE &&
+        context->bt->type == BT_BTM_TYPE_BC127
+    ) {
+        return 1;
+    }
+    if (
+        setting == MENU_SINGLELINE_SETTING_IDX_COLD_OIL_DISPLAY &&
+        (
+            context->uiMode != CONFIG_UI_CD53 ||
+            context->activeView != MENU_SINGLELINE_VIEW_OBC
+        )
+    ) {
+        return 1;
+    }
+    if (
+        setting == MENU_SINGLELINE_SETTING_IDX_LOW_VOLT_WARNING &&
+        context->uiMode != CONFIG_UI_CD53
+    ) {
+        return 1;
+    }
+    return 0;
+}
 
 /**
  * MenuSingleLineInit()
@@ -224,6 +256,7 @@ void MenuSingleLineOBC(MenuSingleLineContext_t *context)
     char text[25] = {0};
     if (
         context->uiMode == CONFIG_UI_CD53 &&
+        ConfigGetSetting(CONFIG_SETTING_COLD_OIL_DISPLAY) == CONFIG_SETTING_ON &&
         context->ibus->oilTemperature > 0 &&
         context->ibus->oilTemperature < MENU_SINGLELINE_OIL_COLD_THRESHOLD_C
     ) {
@@ -498,14 +531,11 @@ void MenuSingleLineSettingsScroll(MenuSingleLineContext_t *context, uint8_t dire
                 nextOption = SETTINGS_MENU[context->settingIdx - 1];
             }
         }
-        // Hide TCU Mode option on HW Version 1. It is not necessary there.
-        if (nextOption == MENU_SINGLELINE_SETTING_IDX_TEL_TCU_MODE &&
-            context->bt->type == BT_BTM_TYPE_BC127
-        ) {
-            if (direction == 0x00) {
-                nextOption++;
+        while (MenuSingleLineSettingIsHidden(context, nextOption)) {
+            if (direction == MENU_SINGLELINE_DIRECTION_FORWARD) {
+                nextOption = SETTINGS_MENU[nextOption + 1];
             } else {
-                nextOption--;
+                nextOption = SETTINGS_MENU[nextOption - 1];
             }
         }
         MenuSingleLineSettingsNextSetting(context, nextOption);
@@ -897,6 +927,44 @@ void MenuSingleLineSettingsNextSetting(MenuSingleLineContext_t *context, uint8_t
             );
         }
     }
+    if (nextMenu == MENU_SINGLELINE_SETTING_IDX_COLD_OIL_DISPLAY) {
+        context->settingValue = ConfigGetSetting(CONFIG_SETTING_COLD_OIL_DISPLAY);
+        if (context->settingValue == CONFIG_SETTING_ON) {
+            MenuSingleLineSetDisplayText(
+                context,
+                "ColdOilDisp: On",
+                0,
+                MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
+            );
+        } else {
+            context->settingValue = CONFIG_SETTING_OFF;
+            MenuSingleLineSetDisplayText(
+                context,
+                "ColdOilDisp: Off",
+                0,
+                MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
+            );
+        }
+    }
+    if (nextMenu == MENU_SINGLELINE_SETTING_IDX_LOW_VOLT_WARNING) {
+        context->settingValue = ConfigGetSetting(CONFIG_SETTING_LOW_VOLT_WARNING);
+        if (context->settingValue == CONFIG_SETTING_ON) {
+            MenuSingleLineSetDisplayText(
+                context,
+                "LowVoltWrn: On",
+                0,
+                MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
+            );
+        } else {
+            context->settingValue = CONFIG_SETTING_OFF;
+            MenuSingleLineSetDisplayText(
+                context,
+                "LowVoltWrn: Off",
+                0,
+                MENU_SINGLELINE_DISPLAY_UPDATE_MAIN
+            );
+        }
+    }
     if (nextMenu == MENU_SINGLELINE_SETTING_IDX_ABOUT) {
         char firmwareVersion[6] = {0};
         ConfigGetFirmwareVersionString(firmwareVersion);
@@ -1018,7 +1086,9 @@ void MenuSingleLineSettingsNextValue(MenuSingleLineContext_t *context, uint8_t d
         }
     }
     if (context->settingIdx == MENU_SINGLELINE_SETTING_IDX_LOWER_VOL_REV ||
-        context->settingIdx == MENU_SINGLELINE_SETTING_IDX_TEL_HFP
+        context->settingIdx == MENU_SINGLELINE_SETTING_IDX_TEL_HFP ||
+        context->settingIdx == MENU_SINGLELINE_SETTING_IDX_COLD_OIL_DISPLAY ||
+        context->settingIdx == MENU_SINGLELINE_SETTING_IDX_LOW_VOLT_WARNING
     ) {
         if (context->settingValue == CONFIG_SETTING_OFF) {
             MenuSingleLineSetDisplayText(

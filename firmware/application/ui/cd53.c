@@ -664,12 +664,10 @@ void CD53IBusRADWriteDisplay(void *ctx, unsigned char *pkt)
 
 static uint8_t CD53DisplayLowVoltageOverride(CD53Context_t *context)
 {
-    if (context->radioType != CONFIG_UI_CD53) {
-        return 0;
-    }
-
     uint8_t batteryVoltage = context->ibus->batteryVoltage;
     if (
+        context->radioType == CONFIG_UI_CD53 &&
+        ConfigGetSetting(CONFIG_SETTING_LOW_VOLT_WARNING) == CONFIG_SETTING_ON &&
         context->engineRunning &&
         batteryVoltage > 0 &&
         batteryVoltage < CD53_LOW_VOLTAGE_THRESHOLD_TENTHS
