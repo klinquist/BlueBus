@@ -19,3 +19,4 @@
 /hardware/v*/BlueBus.*#*
 /hardware/v*/BlueBus.bom
 /hardware/eagle.epf
+/simulator/build/

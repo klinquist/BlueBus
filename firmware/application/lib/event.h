@@ -17,4 +17,5 @@ typedef struct Event_t {
 void EventRegisterCallback(uint8_t, void *, void *);
 uint8_t EventUnregisterCallback(uint8_t, void *);
 void EventTriggerCallback(uint8_t, unsigned char *);
+void EventReset(void);
 #endif /* EVENT_H */

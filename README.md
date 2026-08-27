@@ -93,3 +93,17 @@ Settings are stored in EEPROM and can be configured through the vehicle display 
 * **UI** - Language, temperature units, display preferences
 * **Navigation** - Auto-zoom, map display mode
 
+## CD53 Firmware Simulator
+
+The repository includes a native terminal workbench that runs the production
+CD53, single-line menu, event, and I-Bus packet-handling code against simulated
+hardware adapters. It can exercise the radio buttons, paired-device selection,
+metadata, engine RPM, speed, coolant/oil temperatures, voltage warnings, and
+configuration settings without a vehicle.
+
+```sh
+make -C simulator run
+```
+
+See [simulator/README.md](simulator/README.md) for dependencies, controls,
+architecture, and test commands.

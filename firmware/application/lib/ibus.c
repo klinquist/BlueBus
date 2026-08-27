@@ -985,6 +985,82 @@ static uint8_t IBusValidateChecksum(uint8_t *msg)
 }
 
 /**
+ * IBusProcessFrame()
+ *     Description:
+ *         Validate and dispatch one complete I-Bus frame. The hardware UART
+ *         path and host-side simulators both use this entry point so packet
+ *         decoding remains identical in either environment.
+ *     Params:
+ *         IBus_t *ibus - I-Bus state
+ *         uint8_t *pkt - Complete frame, including checksum
+ *         size_t frameSize - Number of bytes in pkt
+ *     Returns:
+ *         uint8_t - 1 when the frame was accepted, otherwise 0
+ */
+uint8_t IBusProcessFrame(IBus_t *ibus, uint8_t *pkt, size_t frameSize)
+{
+    if (
+        frameSize < 4 ||
+        frameSize > IBUS_MAX_MSG_LENGTH ||
+        pkt[IBUS_PKT_LEN] + 2 != frameSize ||
+        IBusValidateChecksum(pkt) != 1
+    ) {
+        return 0;
+    }
+
+    uint8_t srcSystem = pkt[IBUS_PKT_SRC];
+    if (srcSystem == IBUS_DEVICE_BLUEBUS && pkt[IBUS_PKT_DST] == IBUS_DEVICE_LOC) {
+        IBusHandleBlueBusMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_RAD) {
+        IBusHandleRADMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_BMBT) {
+        IBusHandleBMBTMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_IKE) {
+        IBusHandleIKEMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_IRIS) {
+        IBusHandleIRISMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_GT) {
+        IBusHandleGTMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_LCM) {
+        IBusHandleLCMMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_MID) {
+        IBusHandleMIDMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_NAVE) {
+        IBusHandleNAVMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_MFL) {
+        IBusHandleMFLMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_DSP) {
+        IBusHandleDSPMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_GM) {
+        IBusHandleGMMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_EWS) {
+        IBusHandleEWSMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_VM) {
+        IBusHandleVMMessage(ibus, pkt);
+    }
+    if (srcSystem == IBUS_DEVICE_PDC) {
+        IBusHandlePDCMessage(ibus, pkt);
+    }
+    if (pkt[IBUS_PKT_DST] == IBUS_DEVICE_TEL) {
+        IBusHandleTELMessage(ibus, pkt);
+    }
+    return 1;
+}
+
+/**
  * IBusProcess()
  *     Description:
  *         Process messages in the IBus RX queue
@@ -1038,59 +1114,7 @@ void IBusProcess(IBus_t *ibus)
                     ibus->txRetries = 0;
                 }
                 LogDebugByteArray(LOG_SOURCE_IBUS, pkt, msgLength, suffix, "DEBUG: IBus: RX[%d]", msgLength);
-                if (IBusValidateChecksum(pkt) == 1) {
-                    uint8_t srcSystem = pkt[IBUS_PKT_SRC];
-                    if (srcSystem == IBUS_DEVICE_BLUEBUS &&
-                        pkt[IBUS_PKT_DST] == IBUS_DEVICE_LOC
-                    ) {
-                        IBusHandleBlueBusMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_RAD) {
-                        IBusHandleRADMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_BMBT) {
-                        IBusHandleBMBTMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_IKE) {
-                        IBusHandleIKEMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_IRIS) {
-                        IBusHandleIRISMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_GT) {
-                        IBusHandleGTMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_LCM) {
-                        IBusHandleLCMMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_MID) {
-                        IBusHandleMIDMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_NAVE) {
-                        IBusHandleNAVMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_MFL) {
-                        IBusHandleMFLMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_DSP) {
-                        IBusHandleDSPMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_GM) {
-                        IBusHandleGMMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_EWS) {
-                        IBusHandleEWSMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_VM) {
-                        IBusHandleVMMessage(ibus, pkt);
-                    }
-                    if (srcSystem == IBUS_DEVICE_PDC) {
-                        IBusHandlePDCMessage(ibus, pkt);
-                    }
-                    if (pkt[IBUS_PKT_DST] == IBUS_DEVICE_TEL) {
-                        IBusHandleTELMessage(ibus, pkt);
-                    }
-                } else {
+                if (IBusProcessFrame(ibus, pkt, msgLength) == 0) {
                     LogDebug(
                         LOG_SOURCE_IBUS,
                         "IBus: %02X -> %02X Length: %d - Invalid Checksum",

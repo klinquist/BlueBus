@@ -1,0 +1,33 @@
+name: CD53 Simulator
+
+on:
+  push:
+    paths:
+      - "firmware/application/lib/event.*"
+      - "firmware/application/lib/ibus.*"
+      - "firmware/application/ui/cd53.*"
+      - "firmware/application/ui/menu/menu_singleline.*"
+      - "simulator/**"
+      - ".github/workflows/simulator.yml"
+  pull_request:
+    paths:
+      - "firmware/application/lib/event.*"
+      - "firmware/application/lib/ibus.*"
+      - "firmware/application/ui/cd53.*"
+      - "firmware/application/ui/menu/menu_singleline.*"
+      - "simulator/**"
+      - ".github/workflows/simulator.yml"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install curses headers
+        run: sudo apt-get update && sudo apt-get install -y libncurses-dev
+      - name: Configure
+        run: cmake -S simulator -B simulator/build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build simulator/build --parallel
+      - name: Test
+        run: ctest --test-dir simulator/build --output-on-failure

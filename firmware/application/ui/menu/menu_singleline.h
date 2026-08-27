@@ -52,6 +52,7 @@
 
 #define MENU_SINGLELINE_DIRECTION_FORWARD 0
 #define MENU_SINGLELINE_DIRECTION_BACK 1
+#define MENU_SINGLELINE_DEVICE_NONE 0xFF
 
 // Oil temperature is stored in whole degrees Celsius. 72C is the first
 // whole-degree reading that is not below 160F.

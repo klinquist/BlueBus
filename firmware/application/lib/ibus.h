@@ -768,6 +768,7 @@ typedef struct IBus_t {
 
 IBus_t IBusInit();
 void IBusProcess(IBus_t *);
+uint8_t IBusProcessFrame(IBus_t *, uint8_t *, size_t);
 void IBusSendCommand(IBus_t *, const uint8_t, const uint8_t, const uint8_t *, const size_t);
 void IBusSetInternalIgnitionStatus(IBus_t *, uint8_t);
 uint32_t IBusGetDateTimeAsEpoch(IBusDateTime_t *);

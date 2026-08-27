@@ -10,6 +10,12 @@
 volatile Event_t EVENT_CALLBACKS[EVENT_MAX_CALLBACKS];
 uint8_t EVENT_CALLBACKS_COUNT = 0;
 
+void EventReset(void)
+{
+    memset((void *) EVENT_CALLBACKS, 0, sizeof(EVENT_CALLBACKS));
+    EVENT_CALLBACKS_COUNT = 0;
+}
+
 /**
  * EventRegisterCallback()
  *     Description:

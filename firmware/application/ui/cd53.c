@@ -295,6 +295,7 @@ static void CD53HandleUIButtons(CD53Context_t *context, unsigned char *pkt)
             // Use as "Okay" button
             MenuSingleLineSettingsEditSave(&context->menuContext);
         } else if (context->mode == CD53_MODE_DEVICE_SEL) {
+            MenuSingleLineDevicesConnect(&context->menuContext);
             CD53RedisplayText(context);
         }
     } else if (pkt[IBUS_PKT_DB1] == IBUS_CDC_CMD_CD_CHANGE && pkt[IBUS_PKT_DB2] == 0x03) {
