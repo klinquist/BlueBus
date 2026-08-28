@@ -107,3 +107,17 @@ make -C simulator run
 
 See [simulator/README.md](simulator/README.md) for dependencies, controls,
 architecture, and test commands.
+
+## Building Firmware on macOS
+
+With MPLAB X and the configured XC16 compiler installed, build an
+application-only HEX from any directory with:
+
+```sh
+./scripts/build-firmware.sh
+```
+
+The script reads the compiler and device-pack versions from the MPLAB project,
+installs the required device pack when missing, generates the ignored MPLAB
+Makefiles, performs a clean production build, and prints the output path and
+SHA-256 checksum. An optional output path may be supplied as the first argument.
