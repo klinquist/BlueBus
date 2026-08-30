@@ -340,10 +340,27 @@ The reusable build entry point is:
 ./scripts/build-firmware.sh
 ```
 
+With no source option, the script interactively offers the current working
+tree, upstream master, fork master, or another branch. Scripts and other
+non-interactive callers select the source explicitly:
+
+```sh
+./scripts/build-firmware.sh --source current
+./scripts/build-firmware.sh --source upstream
+./scripts/build-firmware.sh --source fork
+./scripts/build-firmware.sh --source fork --branch feature-cd53-emulator
+./scripts/build-firmware.sh --source local --branch feature-cd53-emulator
+```
+
+Upstream and fork builds fetch `origin` or `fork` before resolving the requested
+branch. Committed sources build in a temporary detached worktree, keeping the
+caller's branch, index, and uncommitted files untouched. The completed HEX is
+copied back into the current clone before the temporary worktree is removed.
+
 An explicit destination may be supplied:
 
 ```sh
-./scripts/build-firmware.sh ~/Desktop/bluebus-test.hex
+./scripts/build-firmware.sh --source current ~/Desktop/bluebus-test.hex
 ```
 
 The script:
@@ -357,12 +374,12 @@ The script:
 6. Generates MPLAB Makefiles.
 7. Performs a clean production build.
 8. Verifies that `application.production.hex` exists and is nonempty.
-9. Copies it to a version/commit-named application HEX.
-10. Prints the firmware version, source commit, path, and SHA-256 checksum.
+9. Copies it to a version/source/commit-named application HEX.
+10. Prints the firmware version, source label, commit, path, and SHA-256 checksum.
 
-The script marks the filename/commit as `-dirty` if tracked or untracked source
-changes are present. This prevents an uncommitted build from looking as though
-it came exactly from the named commit.
+For current-working-tree builds, the script marks the filename/commit as
+`-dirty` if tracked or untracked source changes are present. This prevents an
+uncommitted build from looking as though it came exactly from the named commit.
 
 The device-pack CLI in MPLAB X 6.35 emitted a Java warning about a missing
 Apache Commons Compress class while restoring archive permissions, but it

@@ -111,13 +111,29 @@ architecture, and test commands.
 ## Building Firmware on macOS
 
 With MPLAB X and the configured XC16 compiler installed, build an
-application-only HEX from any directory with:
+application-only HEX from any directory. With no arguments, the script prompts
+for the source to build:
 
 ```sh
 ./scripts/build-firmware.sh
 ```
 
+The source can also be selected explicitly:
+
+```sh
+./scripts/build-firmware.sh --source current
+./scripts/build-firmware.sh --source upstream
+./scripts/build-firmware.sh --source fork
+./scripts/build-firmware.sh --source fork --branch feature-cd53-emulator
+./scripts/build-firmware.sh --source local --branch feature-cd53-emulator
+```
+
+`upstream` and `fork` default to their respective `master` branches and fetch
+the selected remote before building. Remote and local branch builds use a
+temporary detached worktree, so the active branch and local changes are not
+modified. Non-interactive callers must pass `--source`.
+
 The script reads the compiler and device-pack versions from the MPLAB project,
 installs the required device pack when missing, generates the ignored MPLAB
 Makefiles, performs a clean production build, and prints the output path and
-SHA-256 checksum. An optional output path may be supplied as the first argument.
+SHA-256 checksum. An optional output path may be supplied as the final argument.
